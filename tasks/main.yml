@@ -1,0 +1,93 @@
+- name: Find organisation
+  uri:
+    method: GET
+    url: '{{ grafana_conf_grafana_api }}/orgs/name/{{ grafana_conf_organisation }}'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    return_content: true
+    force_basic_auth: true
+  register: org
+
+- name: Check if {{ grafana_conf_grafana_admin_user }} user is in organisation
+  uri:
+    method: GET
+    url: '{{ grafana_conf_grafana_api }}/user/orgs'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    return_content: true
+    force_basic_auth: true
+  register: userorgs
+
+- name: Add {{ grafana_conf_grafana_admin_user }} user to organisation
+  uri:
+    method: POST
+    url: '{{ grafana_conf_grafana_api }}/orgs/{{ org.json.id }}/users'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    body_format: json
+    body:
+      loginOrEmail: '{{ grafana_conf_grafana_admin_user }}'
+      role: Admin
+    force_basic_auth: true
+  when: org.json.id not in userorgs.json|map(attribute='orgId')|list
+
+- name: Switch active organisation for {{ grafana_conf_grafana_admin_user }} user
+  uri:
+    method: POST
+    url: '{{ grafana_conf_grafana_api }}/user/using/{{ org.json.id }}'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    force_basic_auth: true
+
+- name: Find existing datasources
+  uri:
+    method: GET
+    url: '{{ grafana_conf_grafana_api_datasources }}'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    return_content: true
+    force_basic_auth: true
+  register: existing_datasources
+
+- name: Find available datasources
+  set_fact:
+    available_datasources: "{{ grafana_conf_grafana_datasources|map('extract', grafana_conf_grafana_datasource_definitions)|list }}"
+
+- name: Add new datasources
+  uri:
+    method: POST
+    url: '{{ grafana_conf_grafana_api_datasources }}'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    body_format: json
+    body: "{{ item }}"
+    force_basic_auth: true
+  with_items: "{{ available_datasources|extract_new_datasources(existing_datasources['content']) }}"
+
+- name: Find existing dashboards in Grafana
+  uri:
+    method: GET
+    url: '{{ grafana_conf_grafana_api }}/search'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    return_content: true
+    force_basic_auth: true
+  register: existing_dashboards
+
+- name: Find available dashboards
+  find:
+    path: '{{ grafana_conf_grafana_dashboards }}'
+    file_type: file
+    patterns: '*.json'
+  register: available_dashboards
+
+- name: Add new dashboards
+  uri:
+    method: POST
+    url: '{{ grafana_conf_grafana_api }}/dashboards/db'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    body_format: json
+    body: "{{ item }}"
+    force_basic_auth: true
+  with_items: "{{ available_dashboards['files']|extract_new_dashboards(existing_dashboards) }}"

@@ -1,0 +1,8 @@
+#
+# Copyright StackHPC, 2017
+#
+---
+- name: Configure Grafana
+  hosts: localhost
+  roles:
+  - role: grafana-conf
