@@ -2,7 +2,7 @@ Configure Grafana datasources and dashboards
 ============================================
 
 A simple role for loading dashboards and datasources for
-Grafana. If follows the rule that if a dashboard or datasource
+Grafana. It follows the rule that if a dashboard or datasource
 with the same name already exists, then it is not updated. 
 
 It currently works at the organisation level.
@@ -35,9 +35,10 @@ dashboard via the API:
 http://10.1.2.3:3000/api/dashboards/db/tenant-logs
 
 This will return the dashboard as a JSON string. To allow the
-dashboard to load sucessfully it is required to nullify the
+dashboard to load successfully it is required to nullify the
 dashboard id. For example:
 
+```
 <snip>
 "dashboard":{
   "annotations":{"list":[]},
@@ -47,3 +48,4 @@ dashboard id. For example:
   "id":null,                               <-- Must be null
   "links":[],
   "rows": </snip>
+```
