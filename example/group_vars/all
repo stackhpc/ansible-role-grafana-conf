@@ -30,4 +30,4 @@ grafana_conf_grafana_datasources:
   - monasca_log_api
   - elasticsearch
 
-grafana_conf_grafana_dashboards: "/home/grafana-dashboards/my-org/"
+grafana_conf_grafana_dashboards: "./dashboards/"
