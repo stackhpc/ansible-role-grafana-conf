@@ -6,7 +6,7 @@
     password: '{{ grafana_conf_grafana_admin_pass }}'
     return_content: true
     force_basic_auth: true
-  register: org
+  register: grafana_conf_org
 
 - name: Check if {{ grafana_conf_grafana_admin_user }} user is in organisation
   uri:
@@ -16,7 +16,7 @@
     password: '{{ grafana_conf_grafana_admin_pass }}'
     return_content: true
     force_basic_auth: true
-  register: userorgs
+  register: grafana_conf_userorgs
 
 - name: Add {{ grafana_conf_grafana_admin_user }} user to organisation
   uri:
@@ -29,12 +29,12 @@
       loginOrEmail: '{{ grafana_conf_grafana_admin_user }}'
       role: Admin
     force_basic_auth: true
-  when: org.json.id not in userorgs.json|map(attribute='orgId')|list
+  when: grafana_conf_org.json.id not in grafana_conf_userorgs.json|map(attribute='orgId')|list
 
 - name: Switch active organisation for {{ grafana_conf_grafana_admin_user }} user
   uri:
     method: POST
-    url: '{{ grafana_conf_grafana_api }}/user/using/{{ org.json.id }}'
+    url: '{{ grafana_conf_grafana_api }}/user/using/{{ grafana_conf_org.json.id }}'
     user: '{{ grafana_conf_grafana_admin_user }}'
     password: '{{ grafana_conf_grafana_admin_pass }}'
     force_basic_auth: true
@@ -47,11 +47,11 @@
     password: '{{ grafana_conf_grafana_admin_pass }}'
     return_content: true
     force_basic_auth: true
-  register: existing_datasources
+  register: grafana_conf_existing_datasources
 
 - name: Find available datasources
   set_fact:
-    available_datasources: "{{ grafana_conf_grafana_datasources|map('extract', grafana_conf_grafana_datasource_definitions)|list }}"
+    grafana_conf_available_datasources: "{{ grafana_conf_grafana_datasources|map('extract', grafana_conf_grafana_datasource_definitions)|list }}"
 
 - name: Add new datasources
   uri:
@@ -62,7 +62,7 @@
     body_format: json
     body: "{{ item }}"
     force_basic_auth: true
-  with_items: "{{ available_datasources|extract_new_datasources(existing_datasources['content']) }}"
+  with_items: "{{ grafana_conf_available_datasources|extract_new_datasources(grafana_conf_existing_datasources['content']) }}"
 
 - name: Find existing dashboards in Grafana
   uri:
@@ -72,14 +72,14 @@
     password: '{{ grafana_conf_grafana_admin_pass }}'
     return_content: true
     force_basic_auth: true
-  register: existing_dashboards
+  register: grafana_conf_existing_dashboards
 
 - name: Find available dashboards
   find:
     path: '{{ grafana_conf_grafana_dashboards }}'
     file_type: file
     patterns: '*.json'
-  register: available_dashboards
+  register: grafana_conf_available_dashboards
 
 - name: Add new dashboards
   uri:
@@ -90,4 +90,4 @@
     body_format: json
     body: "{{ item }}"
     force_basic_auth: true
-  with_items: "{{ available_dashboards['files']|extract_new_dashboards(existing_dashboards) }}"
+  with_items: "{{ grafana_conf_available_dashboards['files']|extract_new_dashboards(grafana_conf_existing_dashboards) }}"
