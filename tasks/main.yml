@@ -21,7 +21,7 @@
 - name: Add {{ grafana_conf_grafana_admin_user }} user to organisation
   uri:
     method: POST
-    url: '{{ grafana_conf_grafana_api }}/orgs/{{ org.json.id }}/users'
+    url: '{{ grafana_conf_grafana_api }}/orgs/{{ grafana_conf_org.json.id }}/users'
     user: '{{ grafana_conf_grafana_admin_user }}'
     password: '{{ grafana_conf_grafana_admin_pass }}'
     body_format: json
