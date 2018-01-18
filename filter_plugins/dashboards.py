@@ -1,13 +1,13 @@
-# Copyright (c) 2017 StackHPC Ltd.
+# Copyright (c) 2017-2018 StackHPC Ltd.
+import base64
 import json
 
 
-def extract_new_dashboards(dashboard_meta, existing_dashboard_meta):
-    """ Extract new dashboard
+def extract_new_dashboards(dashboards, existing_dashboard_meta):
+    """ Extract new dashboards
 
     Args:
-        dashboard_meta: List of available dashboard files as obtained with
-                        the Ansible find module.
+        dashboards: List of available dashboards (b64 encoded JSON).
         existing_dashboard_meta: List of dashboard metadata returned from
                                  querying api/search for Grafana.
 
@@ -17,19 +17,11 @@ def extract_new_dashboards(dashboard_meta, existing_dashboard_meta):
     """
     existing_dashboard_titles = {d['title'] for d in json.loads(
                                           existing_dashboard_meta['content'])}
-    available_dashboards = _load_dashboards(dashboard_meta)
+    available_dashboards = [json.loads(
+                       base64.b64decode(db['content'])) for db in dashboards]
     new_dashboards = [d for d in available_dashboards if d[
                        'dashboard']['title'] not in existing_dashboard_titles]
     return new_dashboards
-
-
-def _load_dashboards(dashboard_meta):
-    dashboards = []
-    for dashboard in dashboard_meta:
-        with open(dashboard['path']) as json_data:
-            dashboards.append(json.load(json_data))
-    return dashboards
-
 
 class FilterModule(object):
 

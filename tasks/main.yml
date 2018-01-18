@@ -103,6 +103,12 @@
     patterns: '*.json'
   register: grafana_conf_available_dashboards
 
+- name: Slurp available dashboards
+  slurp:
+    src: "{{ item['path'] }}"
+  register: grafana_conf_available_dashboard_contents
+  with_items: "{{ grafana_conf_available_dashboards['files'] }}"
+
 - name: Add new dashboards
   uri:
     method: POST
@@ -112,4 +118,5 @@
     body_format: json
     body: "{{ item }}"
     force_basic_auth: true
-  with_items: "{{ grafana_conf_available_dashboards['files']|extract_new_dashboards(grafana_conf_existing_dashboards) }}"
+  changed_when: True
+  with_items: "{{ grafana_conf_available_dashboard_contents['results']|extract_new_dashboards(grafana_conf_existing_dashboards) }}"
