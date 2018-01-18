@@ -1,4 +1,26 @@
-- name: Find organisation
+- name: List organisations
+  uri:
+    method: GET
+    url: '{{ grafana_conf_grafana_api }}/orgs'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    return_content: true
+    force_basic_auth: true
+  register: grafana_orgs
+
+- name: Create organisation if it doesn't exist
+  uri:
+    method: POST
+    url: '{{ grafana_conf_grafana_api }}/orgs'
+    user: '{{ grafana_conf_grafana_admin_user }}'
+    password: '{{ grafana_conf_grafana_admin_pass }}'
+    body_format: json
+    body:
+      name: '{{ grafana_conf_organisation }}'
+    force_basic_auth: true
+  when: "'{{ grafana_conf_organisation }}' not in grafana_orgs.json|map(attribute='name')|unique"
+
+- name: Lookup organisation
   uri:
     method: GET
     url: '{{ grafana_conf_grafana_api }}/orgs/name/{{ grafana_conf_organisation }}'
