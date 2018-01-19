@@ -20,7 +20,6 @@ grafana_conf_grafana_datasources:
   elasticsearch
     port: 9200
     host: monasca-elasticsearch
-    # For elasticsearch DB name
-    grafana_conf_project_id: "some-id"
+    project_id: "some-id"
 
 grafana_conf_grafana_dashboards: "./dashboards/"
