@@ -77,7 +77,7 @@
       "{{ grafana_conf_grafana_datasource_definitions[item.key] }}"
   register: grafana_conf_enabled_datasources
   with_dict:
-    "{{ grafana_conf_grafana_datasources }}"
+    "{{ grafana_conf_grafana_datasources | default({}, True) }}"
 
 - name: Generate list of enabled datasources
   set_fact:
