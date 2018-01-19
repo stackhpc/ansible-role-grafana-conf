@@ -71,11 +71,20 @@
     force_basic_auth: true
   register: grafana_conf_existing_datasources
 
-- name: Find available datasources
+- name: Template enabled datasources
   set_fact:
-    grafana_conf_available_datasources: "{{ grafana_conf_grafana_datasources|map('extract', grafana_conf_grafana_datasource_definitions)|list }}"
+    grafana_conf_tmp:
+      "{{ grafana_conf_grafana_datasource_definitions[item.key] }}"
+  register: grafana_conf_enabled_datasources
+  with_dict:
+    "{{ grafana_conf_grafana_datasources }}"
 
-- name: Add new datasources
+- name: Generate list of enabled datasources
+  set_fact:
+    grafana_conf_enabled_datasources:
+      "{{ grafana_conf_enabled_datasources.results | map(attribute='ansible_facts.grafana_conf_tmp') | list }}"
+
+- name: Add datasources which are enabled but aren't already configured
   uri:
     method: POST
     url: '{{ grafana_conf_grafana_api_datasources }}'
@@ -84,7 +93,8 @@
     body_format: json
     body: "{{ item }}"
     force_basic_auth: true
-  with_items: "{{ grafana_conf_available_datasources|extract_new_datasources(grafana_conf_existing_datasources['content']) }}"
+  with_items: "{{ grafana_conf_enabled_datasources|extract_new_datasources(grafana_conf_existing_datasources['content']) }}"
+  changed_when: True
 
 - name: Find existing dashboards in Grafana
   uri:

@@ -9,25 +9,18 @@ grafana_conf_grafana_admin_user: "grafana_admin"
 grafana_conf_grafana_admin_pass: "abc123"
 grafana_conf_grafana_url: "http://10.1.2.3:3000"
 
-grafana_conf_monasca_api:
-  port: 8082
-  host: monasca-api
-
-grafana_conf_monasca_log_api:
-  port: 5607
-  host: monasca-log-api
-
-grafana_conf_elasticsearch:
-  port: 9200
-  host: monasca-elasticsearch
-
-# For elasticsearch DB name
-grafana_conf_project_id: "some-id"
-
 # List of datasources to configure
 grafana_conf_grafana_datasources:
-  - monasca_api
-  - monasca_log_api
-  - elasticsearch
+  monasca_api
+    port: 8082
+    host: monasca-api
+  monasca_log_api
+    port: 5607
+    host: monasca-log-api
+  elasticsearch
+    port: 9200
+    host: monasca-elasticsearch
+    # For elasticsearch DB name
+    grafana_conf_project_id: "some-id"
 
 grafana_conf_grafana_dashboards: "./dashboards/"
