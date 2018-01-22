@@ -5,6 +5,9 @@
 
 grafana_conf_grafana_api: "{{ grafana_conf_grafana_url }}/api"
 grafana_conf_grafana_api_datasources: "{{ grafana_conf_grafana_api }}/datasources"
+grafana_conf_grafana_dashboard_repo: {}
+grafana_conf_grafana_dashboard_path: ""
+grafana_conf_enabled_datasources: []
 
 #  All supported datasources
 grafana_conf_grafana_datasource_definitions:

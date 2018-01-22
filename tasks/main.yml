@@ -71,18 +71,12 @@
     force_basic_auth: true
   register: grafana_conf_existing_datasources
 
-- name: Template enabled datasources
-  set_fact:
-    grafana_conf_tmp:
-      "{{ grafana_conf_grafana_datasource_definitions[item.key] }}"
-  register: grafana_conf_enabled_datasources
-  with_dict:
-    "{{ grafana_conf_grafana_datasources | default({}, True) }}"
-
 - name: Generate list of enabled datasources
   set_fact:
     grafana_conf_enabled_datasources:
-      "{{ grafana_conf_enabled_datasources.results | map(attribute='ansible_facts.grafana_conf_tmp') | list }}"
+      "{{ grafana_conf_enabled_datasources + [grafana_conf_grafana_datasource_definitions[item.key]] }}"
+  with_dict:
+    "{{ grafana_conf_grafana_datasources | default({}, True) }}"
 
 - name: Add datasources which are enabled but aren't already configured
   uri:
@@ -96,6 +90,22 @@
   with_items: "{{ grafana_conf_enabled_datasources|extract_new_datasources(grafana_conf_existing_datasources['content']) }}"
   changed_when: True
 
+- name: Ensure a directory exists to clone the dashboard repo into
+  file:
+    path: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+  become: True
+  when: grafana_conf_grafana_dashboard_repo | bool
+
+- name: Clone dashboards
+  git:
+    repo: "{{ grafana_conf_grafana_dashboard_repo.path }}"
+    dest: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
+  when: grafana_conf_grafana_dashboard_repo | bool
+
 - name: Find existing dashboards in Grafana
   uri:
     method: GET
@@ -106,18 +116,29 @@
     force_basic_auth: true
   register: grafana_conf_existing_dashboards
 
-- name: Find available dashboards
+- name: Find dashboards from specified git repo
   find:
-    path: '{{ grafana_conf_grafana_dashboards }}'
+    path: '{{ grafana_conf_grafana_dashboard_repo.checkout_path ~ grafana_conf_grafana_dashboard_repo.relative_path }}'
     file_type: file
     patterns: '*.json'
-  register: grafana_conf_available_dashboards
+  register: grafana_conf_available_dashboards_git
+  when: grafana_conf_grafana_dashboard_repo.checkout_path is defined
+
+- name: Find dashboards from specified path
+  find:
+    path: '{{ grafana_conf_grafana_dashboard_path }}'
+    file_type: file
+    patterns: '*.json'
+  register: grafana_conf_available_dashboards_path
+  when: grafana_conf_grafana_dashboard_path != ""
 
 - name: Slurp available dashboards
   slurp:
     src: "{{ item['path'] }}"
   register: grafana_conf_available_dashboard_contents
-  with_items: "{{ grafana_conf_available_dashboards['files'] }}"
+  with_items:
+    - "{{ grafana_conf_available_dashboards_git['files'] | default([]) }}"
+    - "{{ grafana_conf_available_dashboards_path['files'] | default([]) }}"
 
 - name: Add new dashboards
   uri:
@@ -130,3 +151,4 @@
     force_basic_auth: true
   changed_when: True
   with_items: "{{ grafana_conf_available_dashboard_contents['results']|extract_new_dashboards(grafana_conf_existing_dashboards) }}"
+  when: grafana_conf_available_dashboard_contents['results'] is defined

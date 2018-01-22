@@ -9,7 +9,7 @@ grafana_conf_grafana_admin_user: "grafana_admin"
 grafana_conf_grafana_admin_pass: "abc123"
 grafana_conf_grafana_url: "http://10.1.2.3:3000"
 
-# List of datasources to configure
+# List of datasources to configure (optional)
 grafana_conf_grafana_datasources:
   monasca_api
     port: 8082
@@ -22,4 +22,18 @@ grafana_conf_grafana_datasources:
     host: monasca-elasticsearch
     project_id: "some-id"
 
-grafana_conf_grafana_dashboards: "./dashboards/"
+# Dashboards can be cloned from a git repo to a specified path. It is
+# envisaged that the repo may contain different classes of dashboards,
+# for example for control plane monitoring, or tenant monitoring. It
+# is therefore necessary to set the path within the repo to the required
+# dashboards. (optional)
+grafana_conf_grafana_dashboard_repo:
+    repo: "https://github.com/stackhpc/grafana-reference-dashboards.git"
+    checkout_path: "/opt/grafana/dashboards"
+    # A path relative to the git repo checkout path which contains the
+    # dashboards to be loaded.
+    relative_path: "/monasca/control_plane"
+
+# A folder to load dashboards from. (optional)
+grafana_conf_grafana_dashboard_path:
+  "./dashboards/"
