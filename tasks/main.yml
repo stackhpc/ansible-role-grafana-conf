@@ -79,7 +79,7 @@
     grafana_conf_enabled_datasources:
       "{{ grafana_conf_enabled_datasources + [grafana_conf_grafana_datasource_definitions[item.key]] }}"
   with_dict:
-    "{{ grafana_conf_grafana_datasources | default({}, True) }}"
+    "{{ grafana_conf_grafana_datasources }}"
 
 - name: Add datasources which are enabled but aren't already configured
   uri:
