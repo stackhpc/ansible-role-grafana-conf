@@ -26,7 +26,7 @@ grafana_conf_grafana_datasource_definitions:
     "user": "",
     "password": "",
     "type": "monasca-datasource",
-    "url": "http://{{ item.value.host }}:{{ item.value.port }}/",
+    "url": "http://{{ datasource.host }}:{{ datasource.port }}/",
     "withCredentials": false
     }
   monasca_log_api: |
@@ -45,7 +45,7 @@ grafana_conf_grafana_datasource_definitions:
     "user": "",
     "password": "",
     "type": "monasca-datasource",
-    "url": "http://{{ item.value.host }}:{{ item.value.port }}/",
+    "url": "http://{{ datasource.host }}:{{ datasource.port }}/",
     "withCredentials": false
      }
   elasticsearch: |
@@ -54,7 +54,7 @@ grafana_conf_grafana_datasource_definitions:
     "basicAuth": false,
     "basicAuthPassword": "",
     "basicAuthUser": "",
-    "database": "[monasca-{{ item.value.project_id|default() }}-]YYYY.MM.DD",
+    "database": "[monasca-{{ datasource.project_id|default() }}-]YYYY.MM.DD",
     "isDefault": false,
     "jsonData": {
       "esVersion": 2,
@@ -64,7 +64,7 @@ grafana_conf_grafana_datasource_definitions:
     "name": "Elasticsearch",
     "password": "",
     "type": "elasticsearch",
-    "url": "http://{{ item.value.host }}:{{ item.value.port }}/",
+    "url": "http://{{ datasource.host }}:{{ datasource.port }}/",
     "user": "",
     "withCredentials": false
     }
