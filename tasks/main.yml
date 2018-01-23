@@ -1,3 +1,11 @@
+- name: Install unofficial Grafana plugins from git
+  git:
+    repo: '{{ item.repo }}'
+    version: '{{ item.version }}'
+    dest: '{{ grafana_conf_plugins_install_dir ~ item.name }}'
+  with_items: '{{ grafana_conf_plugins_git }}'
+  notify: restart grafana
+
 - name: List organisations
   uri:
     method: GET

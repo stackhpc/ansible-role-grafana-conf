@@ -38,3 +38,10 @@ grafana_conf_grafana_dashboard_repo:
 # A folder to load dashboards from. (optional)
 grafana_conf_grafana_dashboard_path:
   "./dashboards/"
+
+# A list of unofficial plugins, or forks of plugins, which aren't
+# available from the official Grafana plugins repo.
+grafana_conf_plugins_git:
+  - name: 'monasca-grafana-datasource'
+    repo: 'https://github.com/stackhpc/monasca-grafana-datasource.git'
+    version: '82e950b7d17a91dc8fa72432559c21da5fde5bce'

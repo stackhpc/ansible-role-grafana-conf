@@ -9,6 +9,8 @@ grafana_conf_grafana_dashboard_repo: {}
 grafana_conf_grafana_dashboard_path: ""
 grafana_conf_grafana_datasources: {}
 grafana_conf_enabled_datasources: []
+grafana_conf_plugins_git: []
+grafana_conf_plugins_install_dir: '/var/lib/grafana/plugins/'
 
 #  All supported datasources
 grafana_conf_grafana_datasource_definitions:
