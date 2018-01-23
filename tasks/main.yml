@@ -101,14 +101,14 @@
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
   become: True
-  when: grafana_conf_grafana_dashboard_repo | bool
+  when: grafana_conf_grafana_dashboard_repo is defined
 
 - name: Clone dashboards
   git:
     repo: "{{ grafana_conf_grafana_dashboard_repo.repo }}"
     dest: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
     version: "{{ grafana_conf_grafana_dashboard_repo.version | default('HEAD') }}"
-  when: grafana_conf_grafana_dashboard_repo | bool
+  when: grafana_conf_grafana_dashboard_repo is defined
 
 - name: Find existing dashboards in Grafana
   uri:
