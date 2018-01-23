@@ -107,6 +107,7 @@
   git:
     repo: "{{ grafana_conf_grafana_dashboard_repo.repo }}"
     dest: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
+    version: "{{ grafana_conf_grafana_dashboard_repo.version | default('HEAD') }}"
   when: grafana_conf_grafana_dashboard_repo | bool
 
 - name: Find existing dashboards in Grafana

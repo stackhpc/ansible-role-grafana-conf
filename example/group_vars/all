@@ -29,6 +29,7 @@ grafana_conf_grafana_datasources:
 # dashboards. (optional)
 grafana_conf_grafana_dashboard_repo:
     repo: "https://github.com/stackhpc/grafana-reference-dashboards.git"
+    version: master
     checkout_path: "/opt/grafana/dashboards"
     # A path relative to the git repo checkout path which contains the
     # dashboards to be loaded.
