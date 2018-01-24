@@ -93,23 +93,6 @@
   with_items: "{{ grafana_conf_enabled_datasources|extract_new_datasources(grafana_conf_existing_datasources['content']) }}"
   changed_when: True
 
-- name: Ensure a directory exists to clone the dashboard repo into
-  file:
-    path: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
-    state: directory
-    mode: 0755
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
-  become: True
-  when: grafana_conf_grafana_dashboard_repo is defined
-
-- name: Clone dashboards
-  git:
-    repo: "{{ grafana_conf_grafana_dashboard_repo.repo }}"
-    dest: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
-    version: "{{ grafana_conf_grafana_dashboard_repo.version | default('HEAD') }}"
-  when: grafana_conf_grafana_dashboard_repo is defined
-
 - name: Find existing dashboards in Grafana
   uri:
     method: GET
@@ -120,13 +103,37 @@
     force_basic_auth: true
   register: grafana_conf_existing_dashboards
 
+- name: Validate dashboard repo configuration
+  set_fact:
+    grafana_conf_dashboard_repo_set: "{{
+      (grafana_conf_grafana_dashboard_repo.get('repo') is not none) and
+      (grafana_conf_grafana_dashboard_repo.get('checkout_path') is not none) and
+      (grafana_conf_grafana_dashboard_repo.get('relative_path') is not none) }}"
+
+- name: Ensure a directory exists to clone the dashboard repo into
+  file:
+    path: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+  become: True
+  when: grafana_conf_dashboard_repo_set
+
+- name: Clone dashboards
+  git:
+    repo: "{{ grafana_conf_grafana_dashboard_repo.repo }}"
+    dest: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
+    version: "{{ grafana_conf_grafana_dashboard_repo.version | default('HEAD') }}"
+  when: grafana_conf_dashboard_repo_set
+
 - name: Find dashboards from specified git repo
   find:
     path: '{{ grafana_conf_grafana_dashboard_repo.checkout_path ~ grafana_conf_grafana_dashboard_repo.relative_path }}'
     file_type: file
     patterns: '*.json'
   register: grafana_conf_available_dashboards_git
-  when: grafana_conf_grafana_dashboard_repo.checkout_path is defined
+  when: grafana_conf_dashboard_repo_set
 
 - name: Find dashboards from specified path
   find:
