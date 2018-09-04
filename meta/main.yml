@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  role_name: grafana-conf
+  #role_name: grafana_conf
   author: StackHPC Ltd
   description: >
     Role to configure Grafana dashboards and datasources
