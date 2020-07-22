@@ -18,7 +18,7 @@
     body:
       name: '{{ grafana_conf_organisation }}'
     force_basic_auth: true
-  when: "'{{ grafana_conf_organisation }}' not in grafana_orgs.json|map(attribute='name')|unique"
+  when: "grafana_conf_organisation not in grafana_orgs.json|map(attribute='name')|unique"
 
 - name: Lookup organisation
   uri:
