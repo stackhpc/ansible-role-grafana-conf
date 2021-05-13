@@ -142,7 +142,7 @@
     file_type: file
     patterns: '*.json'
   register: grafana_conf_available_dashboards_path
-  when: grafana_conf_grafana_dashboard_path != ""
+  when: grafana_conf_grafana_dashboard_path | length > 0
 
 - name: Slurp available dashboards
   slurp:
