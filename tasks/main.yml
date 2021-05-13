@@ -115,8 +115,8 @@
     path: "{{ grafana_conf_grafana_dashboard_repo.checkout_path }}"
     state: directory
     mode: 0755
-    owner: "{{ ansible_user_uid }}"
-    group: "{{ ansible_user_gid }}"
+    owner: "{{ ansible_facts.user_uid }}"
+    group: "{{ ansible_facts.user_gid }}"
   become: True
   when: grafana_conf_dashboard_repo_set
 
